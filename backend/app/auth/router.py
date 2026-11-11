@@ -1,6 +1,14 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
+from sqlalchemy.orm import Session
 
 from app.auth.oidc_client import oauth
+from app.core.database import get_db
+from app.services.user_service import (
+    InactiveUserError,
+    InvalidIdentityError,
+    UserService,
+)
 
 router = APIRouter(prefix="/auth/microsoft", tags=["auth"])
 
@@ -12,13 +20,20 @@ async def login(request: Request):
 
 
 @router.get("/callback", name="microsoft_callback")
-async def callback(request: Request):
+async def callback(request: Request, db: Session = Depends(get_db)):
     token = await oauth.microsoft.authorize_access_token(request)
-    user = token["userinfo"]
+    claims = token["userinfo"]
+
+    try:
+        # The DB driver is synchronous, so keep it off the event loop.
+        user = await run_in_threadpool(UserService(db).login_with_microsoft, claims)
+    except InactiveUserError:
+        raise HTTPException(status_code=403, detail="User is deactivated")
+    except InvalidIdentityError:
+        raise HTTPException(status_code=400, detail="Invalid identity token")
 
     return {
-        "name": user.get("name"),
-        "email": user.get("email") or user.get("preferred_username"),
-        "sub": user.get("sub"),
-        "tenant_id": user.get("tid"),
+        "id": str(user.id),
+        "email": user.email,
+        "display_name": user.display_name,
     }
