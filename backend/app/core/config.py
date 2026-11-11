@@ -19,6 +19,12 @@ class Settings(BaseSettings):
 
     SESSION_TTL_SECONDS: int = 600
 
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 1522
+    DB_SERVICE_NAME: str = "FREEPDB1"
+    DB_USER: str
+    DB_PASSWORD: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
