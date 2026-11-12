@@ -1,0 +1,52 @@
+{
+  "_about": "Claims Microsoft Entra ID returns in the ID token after a successful login. Scopes requested by this app: openid profile email. Values below are PLACEHOLDERS (typical Entra v2.0 token). The exact set depends on tenant and app registration, so confirm with a real login.",
+
+  "id_token_claims": {
+    "iss": "https://login.microsoftonline.com/<tenant-id>/v2.0",
+    "aud": "<app client id>",
+    "sub": "<pairwise user id, stable per user per app>",
+    "oid": "<user object id in the tenant, same across apps>",
+    "tid": "<tenant id>",
+    "name": "Pranto Bhowmik",
+    "preferred_username": "pranto.bhowmik@mustaruusu.com",
+    "email": "pranto.bhowmik@mustaruusu.com",
+    "nonce": "<value this app sent at login>",
+    "iat": 1700000000,
+    "nbf": 1700000000,
+    "exp": 1700003600,
+    "ver": "2.0",
+    "uti": "<token unique id>",
+    "rh": "<internal Microsoft value>"
+  },
+
+  "validated_by_authlib": {
+    "signature": "against Microsoft's published keys (jwks_uri)",
+    "iss": "must equal the issuer in the discovery document",
+    "aud": "must equal this app's client id",
+    "exp_iat": "checked, with 120 seconds of clock leeway",
+    "nonce": "must equal the value stored at login",
+    "state_and_pkce": "state checked on callback, PKCE verifier sent in the token exchange"
+  },
+
+  "how_this_app_uses_them": {
+    "iss + sub": "identity key, stored in user_identities (unique together). Never use email to identify a user",
+    "tid": "user_identities.tenant_id",
+    "name": "users.display_name, refreshed on every login",
+    "email or preferred_username": "users.email, refreshed on every login (email is not guaranteed to be present or verified)",
+    "not_stored": ["oid", "nonce", "iat", "exp", "access token", "ID token", "refresh token"]
+  },
+
+  "caveats": {
+    "email": "Optional in Entra. Can be missing, and is not guaranteed verified, so it is never used to match accounts",
+    "preferred_username": "Display hint only. It can change and is not a stable id",
+    "guest_users": "External or guest accounts may add an 'idp' claim and a different iss/tid",
+    "tokens_not_kept": "The access and ID tokens are discarded after the callback"
+  },
+
+  "obtainable_with_more_configuration": {
+    "optional_claims_in_app_registration": ["given_name", "family_name", "upn", "ctry", "verified_primary_email", "groups (with group claims enabled)", "roles (with app roles defined)"],
+    "oidc_userinfo_endpoint": ["sub", "name", "given_name", "family_name", "picture", "email"],
+    "microsoft_graph_me_endpoint": ["displayName", "mail", "jobTitle", "department", "officeLocation", "mobilePhone", "manager"],
+    "graph_requirements": "needs the User.Read scope (and an access token, which this app does not currently keep)"
+  }
+}

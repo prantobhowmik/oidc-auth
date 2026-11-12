@@ -13,11 +13,16 @@ class Settings(BaseSettings):
 
     SESSION_SECRET_KEY: str
 
-    SESSION_COOKIE_NAME: str = "oidc_transaction"
+    # Short-lived cookie that only carries OIDC state/nonce/PKCE during login.
+    OIDC_TRANSACTION_COOKIE_NAME: str = "oidc_transaction"
+    OIDC_TRANSACTION_TTL_SECONDS: int = 600
+
+    # Application session cookie (opaque id; the session itself lives in the DB).
+    SESSION_COOKIE_NAME: str = "app_session"
     SESSION_COOKIE_SECURE: bool = False
     SESSION_COOKIE_SAMESITE: str = "lax"
-
-    SESSION_TTL_SECONDS: int = 600
+    SESSION_TTL_SECONDS: int = 1800  # idle timeout
+    SESSION_ABSOLUTE_TTL_SECONDS: int = 43200  # hard limit, 12 hours
 
     DB_HOST: str = "localhost"
     DB_PORT: int = 1522
